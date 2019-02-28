@@ -1,0 +1,104 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+</head>
+<style>
+    body {
+        background-color: #F8E0E6;
+        margin: 0;
+    }
+
+    #logo {
+        color: black;
+        font-size: 60px;
+        text-align: center;
+        padding-top: 150px;
+        padding: 30;
+    }
+
+    #memberProfile {
+        position: relative;
+        left: 80px;
+        top: -70px;
+        background-color: darksalmon;
+        border: none;
+    }
+
+    #text-box {
+        text-align: center;
+        position: relative;
+        top: 10px;
+    }
+
+    p {
+        margin: 10px;
+    }
+
+    #birth-sort {
+        position: relative;
+        right: 17.5px;
+    }
+
+    #img-user {
+        position: relative;
+        text-align: center;
+        top: 20px;
+        right: 50px;
+        margin: 0px;
+    }
+
+    .img-calendar {
+        position: relative;
+        top: -22px;
+        left: 70px;
+    }
+
+    #radio-button {
+        text-align: center;
+        position: relative;
+        right: 20px;
+    }
+
+    #check {
+        position: relative;
+        right: 15px;
+        top: 20px;
+        background-color: darksalmon;
+        border: none;
+    }
+</style>
+
+<body>
+    <div id="logo">picup</div>
+    <div id="img-user">
+        <img src="./imgs-user" width=150px height=150px onError="this.style.visibility='hidden'">
+    </div>
+
+    <center>
+        <button id=memberProfile>프로필 사진 설정</button>
+    </center>
+
+    <div id="text-box">
+        <p><input type="text" name="memberName" placeholder="이름 입력" size=20></p>
+        <p><input type="text" name="email" placeholder="이메일 입력" size=20></p>
+        <p id="birth-sort"><input type="text" name="birth" placeholder="년/월/일" size=15></p>
+    </div>
+
+    <center>
+        <img class="img-calendar" src="./imgs-calendar">
+    </center>
+
+    <form id="radio-button">
+        <input type="radio" name="gender" value="male" checked="checked">남자
+        <input type="radio" name="gender" value="female">여자
+    </form>
+
+    <center>
+        <button id=check>확인</button>
+    </center>
+
+</body>
+
+</html>

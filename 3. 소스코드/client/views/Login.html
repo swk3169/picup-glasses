@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport"
+        content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width" />
+    <script src="//developers.kakao.com/sdk/js/kakao.min.js"></script>
+
+</head>
+<style>
+    body {
+        background-color: #F8E0E6;
+        margin: 0;
+    }
+
+    #logo {
+        color: black;
+        font-size: 60px;
+        text-align: center;
+        padding-top: 200px;
+        padding: 30;
+    }
+
+    #kakao_login {
+        text-align: center;
+        padding-top: 30px;
+    }
+
+    #fb-root {
+        text-align: center;
+        padding-top: 10px;
+    }
+</style>
+
+<body>
+    <div id="logo">picup</div>
+    <div id="kakao_login">
+        <a id="kakao-login-btn"></a>
+        <script type='text/javascript'>
+            //<![CDATA[
+            // 사용할 앱의 JavaScript 키를 설정해 주세요.
+            Kakao.init('eadcd57d233e7b519a9ac7b3e7bb1d1f');
+            // 카카오 로그인 버튼을 생성합니다.
+            Kakao.Auth.createLoginButton({
+                container: '#kakao-login-btn',
+                success: function (authObj) {
+                    // 로그인 성공시, API를 호출합니다.
+                    Kakao.API.request({
+                        url: '/v2/user/me',
+                        success: function (res) {
+                            alert(JSON.stringify(res));
+                        },
+                        fail: function (error) {
+                            alert(JSON.stringify(error));
+                        }
+                    });
+                },
+                fail: function (err) {
+                    alert(JSON.stringify(err));
+                }
+            });
+          //]]>
+        </script>
+    </div>
+    <div id="fb-root">
+        <script async defer
+            src="https://connect.facebook.net/ko_KR/sdk.js#xfbml=1&version=v3.2&appId=2240274779520399&autoLogAppEvents=1"></script>
+            <div class="fb-login-button" data-size="large" data-button-type="continue_with" data-auto-logout-link="false"
+            data-use-continue-as="false"></div>
+        </div>
+    </div>
+</body>
+
+</html>
