@@ -1,0 +1,201 @@
+package com.example.bluetooth_2;
+
+import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
+import android.content.Intent;
+import android.icu.text.DateFormat;
+import android.icu.text.SimpleDateFormat;
+
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+//import android.widget.CheckBox;
+import android.widget.Toast;
+
+
+import java.util.Date;
+//import java.util.TimerTask;
+
+import app.akexorcist.bluetotohspp.library.BluetoothSPP;
+import app.akexorcist.bluetotohspp.library.BluetoothState;
+import app.akexorcist.bluetotohspp.library.DeviceList;
+
+
+public class MainActivity extends AppCompatActivity {
+
+    private BluetoothSPP bt;
+    // 현재시간을 msec 으로 구한다.
+    boolean isConnected = false;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        Thread t = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    while (!isInterrupted()) {          //스레드에 interrupt()메소드를 호출하면 isInterrupted 메소드는 true를 리턴해서 while 빠져나감
+                                                        // runnable한 상태에서 interrupt가 발생했을 때 이를 체크할 용도로 사용하면 됨 -> 반복적인 작업을 수행하면서 인터럽트 여부를 체크하기 위한 상태
+                        Thread.sleep(1000);     //1초 동안 스레드 중지
+                        runOnUiThread(new Runnable() { // 현재 스레드가 UI 스레드라면 UI 자원을 사용하는 행동에 대해서는 즉시 실행된다는 것, 만약 현재 스레드가 UI 스레드가 아니라면 행동은 UI 스레드의 자원 사용 이벤트 큐에 들어가게 되는 것
+
+                            @Override
+                            public void run() {
+                                showTime();
+                            };
+                        });
+                    }
+                } catch (Exception e) {
+                }
+            }
+        };
+        t.start();
+
+
+
+//        TimerTask t = new TimerTask() {
+//            @Override
+//            public void run() {
+//                if(isConnected) {
+//                    Date date = new Date();
+//                    // 시간을 나타냇 포맷? 정한다
+//                    SimpleDateFormat sdfNow = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+//                    // nowDate 변수에 값을 저장하고...
+//                    String formatDate = sdfNow.format(date);
+//                    bt.send(formatDate, true);
+//                }
+//            }
+//        };
+//        public void ShowTimeMethod() {
+//            final Handler handler = new Handler() {
+//                @Override
+//                public void handleMessage(Message msg) {
+//                    Show_Time.setText(DateFormat.getDateTimeInstance().format(new Date()));
+//                }
+//            };
+//            Runnable task = new Runnable() {
+//                @Override
+//                public void run() {
+//                    while (true) {
+//                        try {
+//                            Thread.sleep(1000);
+//
+//                        } catch (InterruptedException e) {
+//                        }
+//                        handler.sendEmptyMessage(1);
+//                    }
+//                }
+//            };
+//            Thread thread = new Thread(task);
+//            thread.start();
+//        }
+
+        bt = new BluetoothSPP(this); //Initializing
+
+        if (!bt.isBluetoothAvailable()) { //블루투스 사용 불가
+            Toast.makeText(getApplicationContext()
+                    , "Bluetooth is not available"
+                    , Toast.LENGTH_SHORT).show();
+            finish();
+        }
+        bt.setOnDataReceivedListener(new BluetoothSPP.OnDataReceivedListener() { //데이터 수신
+            public void onDataReceived(byte[] data, String message) {
+                Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
+        bt.setBluetoothConnectionListener(new BluetoothSPP.BluetoothConnectionListener() { //연결됐을 때
+            public void onDeviceConnected(String name, String address) {
+                Toast.makeText(getApplicationContext()
+                        , "Connected to " + name + "\n" + address
+                        , Toast.LENGTH_SHORT).show();
+            }
+
+            public void onDeviceDisconnected() { //연결해제
+                Toast.makeText(getApplicationContext()
+                        , "Connection lost", Toast.LENGTH_SHORT).show();
+            }
+
+            public void onDeviceConnectionFailed() { //연결실패
+                Toast.makeText(getApplicationContext()
+                        , "Unable to connect", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        Button btnConnect = findViewById(R.id.btnConnect); //연결시도
+        btnConnect.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                if (bt.getServiceState() == BluetoothState.STATE_CONNECTED) {
+                    bt.disconnect();
+                } else {
+                    Intent intent = new Intent(getApplicationContext(), DeviceList.class);  // 이미 페어링된 목록-> 선택후 , connect 화면 뜸
+                    startActivityForResult(intent, BluetoothState.REQUEST_CONNECT_DEVICE);
+                }
+            }
+        });
+//
+//       // final CheckBox checkBox = findViewById(R.id.checkBox);
+//
+//        //checkBox.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if(checkBox.isChecked()==true) Toast.makeText(getApplicationContext(),formatDate,Toast.LENGTH_SHORT).show();
+//            }
+//        });
+    }
+    private void showTime(){
+        if(isConnected) {
+                    Date date = new Date();
+                    // 시간을 나타냇 포맷? 정한다
+                    SimpleDateFormat sdfNow = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                    String formatDate = sdfNow.format(date);
+                    bt.send(formatDate, true);
+                }
+    }
+
+    public void onDestroy() {
+        super.onDestroy();
+        bt.stopService(); //블루투스 중지
+    }
+
+    public void onStart() {
+        super.onStart();
+        if (!bt.isBluetoothEnabled()) { //
+            Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(intent, BluetoothState.REQUEST_ENABLE_BT);
+        } else {
+            if (!bt.isServiceAvailable()) {
+                bt.setupService();
+                bt.startService(BluetoothState.DEVICE_OTHER);
+                setup();
+            }
+        }
+    }
+
+    public void setup() {
+        isConnected = true; //데이터 전송
+
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == BluetoothState.REQUEST_CONNECT_DEVICE) {
+            if (resultCode == Activity.RESULT_OK)
+                bt.connect(data);
+        } else if (requestCode == BluetoothState.REQUEST_ENABLE_BT) {
+            if (resultCode == Activity.RESULT_OK) {
+                bt.setupService();
+                bt.startService(BluetoothState.DEVICE_OTHER);
+                setup();
+            } else {
+                Toast.makeText(getApplicationContext()
+                        , "Bluetooth was not enabled."
+                        , Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        }
+    }
+}
